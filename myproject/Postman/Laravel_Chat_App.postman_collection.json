@@ -1,0 +1,1785 @@
+{
+  "info": {
+    "_postman_id": "0e7387bb-215f-4ffb-8b98-236b5d3a33e6",
+    "name": "Laravel_Chat_App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "46091603",
+    "_collection_link": "https://go.postman.co/collection/46091603-0e7387bb-215f-4ffb-8b98-236b5d3a33e6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "item": [
+            {
+              "name": "register-success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Comprehensive test script for registration\r",
+                      "pm.test(\"Status code is 201 Created\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response time is acceptable\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response has correct structure\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.have.property('message');\r",
+                      "});\r",
+                      "\r",
+                      "// Variable extraction with error handling\r",
+                      "try {\r",
+                      "    if (pm.response.code === 201) {\r",
+                      "        const reqBody = JSON.parse(pm.request.body.raw);\r",
+                      "        pm.environment.set(\"new_user_email\", reqBody.email);\r",
+                      "        \r",
+                      "        const jsonData = pm.response.json();\r",
+                      "        if (jsonData.token) {\r",
+                      "            pm.environment.set(\"token\", jsonData.token);\r",
+                      "        }\r",
+                      "        if (jsonData.otp) {\r",
+                      "            pm.environment.set(\"current_otp\", jsonData.otp);\r",
+                      "        }\r",
+                      "    }\r",
+                      "} catch (e) {\r",
+                      "    console.error(\"Error extracting variables: \" + e.message);\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"TestUserf3\",\r\n    \"email\": \"testuserf3@example.com\",\r\n    \"password\": \"password\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/register",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Verify OTP",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Check if verification worked\r",
+                      "if (pm.response.code === 200) {\r",
+                      "    console.log(\"Account Verified Successfully!\");\r",
+                      "    \r",
+                      "    // 2. (Optional) Auto-Login logic\r",
+                      "    // If your verify endpoint returns a token immediately, save it here:\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    if (jsonData.token) {\r",
+                      "        pm.environment.set(\"token\", jsonData.token);\r",
+                      "        console.log(\"Token saved from verification step.\");\r",
+                      "    }\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\": \"testuserf2@example.com\", \"otp\": \"848063\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/otp/verify",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "otp",
+                    "verify"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "register-fail",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Check for 422 Status\r",
+                      "pm.test(\"Status code is 422\", function () {\r",
+                      "    pm.response.to.have.status(422);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check for the specific error message\r",
+                      "pm.test(\"Error is 'Email already taken'\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    // Laravel usually returns errors in an 'errors' object\r",
+                      "    pm.expect(jsonData.errors).to.have.property('email');\r",
+                      "    pm.expect(jsonData.errors.email[0]).to.include(\"taken\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"bad-email\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/register",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Invalid Credentials",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Check Status Code\r",
+                      "pm.test(\"Status code is 422\", function () {\r",
+                      "    pm.response.to.have.status(422);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check for Email Error\r",
+                      "pm.test(\"Email validation failed\", function () {\r",
+                      "    pm.expect(jsonData.errors).to.have.property('email');\r",
+                      "    // Ensure message mentions validity\r",
+                      "    pm.expect(jsonData.errors.email[0]).to.include(\"valid email\");\r",
+                      "});\r",
+                      "\r",
+                      "// 3. Check for Password Error\r",
+                      "pm.test(\"Password validation failed\", function () {\r",
+                      "    pm.expect(jsonData.errors).to.have.property('password');\r",
+                      "    // Ensure message mentions length (e.g. \"at least 6 characters\")\r",
+                      "    pm.expect(jsonData.errors.password[0]).to.include(\"least\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Test User\",\r\n    \"email\": \"not-an-email\",       \r\n    \"password\": \"123\",             \r\n    \"password_confirmation\": \"123\" \r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/register",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "item": [
+            {
+              "name": "login-success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response contains token\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.have.property('token');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Token is not empty\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.token).to.not.be.empty;\r",
+                      "});\r",
+                      "\r",
+                      "// Extract and save token\r",
+                      "try {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    if (jsonData.token) {\r",
+                      "        pm.environment.set(\"token\", jsonData.token);\r",
+                      "    }\r",
+                      "    if (jsonData.user && jsonData.user.id) {\r",
+                      "        pm.environment.set(\"user_id\", jsonData.user.id);\r",
+                      "    }\r",
+                      "} catch (e) {\r",
+                      "    console.error(\"Error: \" + e.message);\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n\"email\": \"testuserf3@example.com\",\r\n    \"password\": \"password\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/login",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Email not register",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Check if Status Code is 401 Unauthorized\r",
+                      "pm.test(\"Status code is 401\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check if the Error Message matches your Controller\r",
+                      "pm.test(\"Error message is 'Invalid login credentials'\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    // This must match exactly what you wrote in AuthController.php\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Invalid login credentials\");\r",
+                      "});\r",
+                      "\r",
+                      "// 3. Ensure no token was returned (Security Check)\r",
+                      "pm.test(\"Token is not present\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.not.have.property(\"token\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"new@test.com\",\"password\":\"wrong\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/login",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Invalid Credentials",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Check Status Code (Must be 401 Unauthorized)\r",
+                      "pm.test(\"Status code is 401\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check Error Message\r",
+                      "// This matches your controller: return response()->json(['message' => 'Invalid login credentials'], 401);\r",
+                      "pm.test(\"Error message is correct\", function () {\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Invalid login credentials\");\r",
+                      "});\r",
+                      "\r",
+                      "// 3. Security Check: Ensure no Token is returned\r",
+                      "pm.test(\"Token is not returned\", function () {\r",
+                      "    pm.expect(jsonData).to.not.have.property(\"token\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\": \"new@test.com\", \"password\": \"wrongpassword123\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/login",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "logout",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/logout",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "logout"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Password",
+          "item": [
+            {
+              "name": "Forgot Password request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "\r",
+                      "if (pm.response.code === 200) {\r",
+                      "    if (jsonData.reset_token) {\r",
+                      "        pm.environment.set(\"reset_token\", jsonData.reset_token);\r",
+                      "        console.log(\"Reset Token saved!\");\r",
+                      "    }\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\":\"testuserf2@example.com\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/forgot-password",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "forgot-password"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Forgot Password reset",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Check Status Code (404 Not Found)\r",
+                      "pm.test(\"Status code is 404\", function () {\r",
+                      "    pm.response.to.have.status(404);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check Error Message\r",
+                      "// Matches controller: return response()->json(['message' => 'User not found.'], 404);\r",
+                      "pm.test(\"Error message is 'User not found.'\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.message).to.eql(\"User not found.\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"testuserf2@example.com\",\r\n    \"token\": \"RuPLsiyh0va7PtxLjgS1Na2ElnLCeHCyNBKwmSzJOWdJcvbTTkQ902JOXzKI\",\r\n    \"password\": \"newpassword\",\r\n    \"password_confirmation\": \"newpassword\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/reset-password",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "reset-password"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Invalid Credentials",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Check Status Code (422 Unprocessable Content)\r",
+                      "pm.test(\"Status code is 422\", function () {\r",
+                      "    pm.response.to.have.status(422);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Check for specific Password Error\r",
+                      "pm.test(\"Error message is 'Password too short'\", function () {\r",
+                      "    // Ensure the 'password' field has an error\r",
+                      "    pm.expect(jsonData.errors).to.have.property('password');\r",
+                      "    \r",
+                      "    // Check the message (Laravel default: \"The password must be at least 6 characters.\")\r",
+                      "    pm.expect(jsonData.errors.password[0]).to.include(\"least\"); \r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"email\": \"unregistered@test.com\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/forgot-password",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "forgot-password"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Channels",
+      "item": [
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/channels/6981ebcbcfd4e5ec660cb17a",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "channels",
+                "6981ebcbcfd4e5ec660cb17a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Renamed Channel\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/channels/6980923565151894a50fe0dd",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "channels",
+                "6980923565151894a50fe0dd"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Channel list",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/channels?workspace_id=...",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "channels"
+              ],
+              "query": [
+                {
+                  "key": "workspace_id",
+                  "value": "..."
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create channel-success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    pm.environment.set(\"channel_id\", jsonData._id);\r",
+                  "    console.log(\"Channel ID saved: \" + jsonData._id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"new2testmessagechannel\",\r\n    \"workspace_id\": \"6981d8c2cfd4e5ec660cb173\",\r\n    \"type\": \"public\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/channels",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "channels"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Check Status Code (422 Unprocessable Content)\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Check for Name Error\r",
+                  "pm.test(\"Name validation failed\", function () {\r",
+                  "    // Ensure the 'name' field is in the errors list\r",
+                  "    pm.expect(jsonData.errors).to.have.property('name');\r",
+                  "    \r",
+                  "    // Check the message (Laravel default: \"The name field is required.\")\r",
+                  "    pm.expect(jsonData.errors.name[0]).to.include(\"required\"); \r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"general\", \"workspace_id\":\"BAD_ID\"}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/channels",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "channels"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "send text success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    pm.environment.set(\"message_id\", jsonData._id);\r",
+                  "    console.log(\"Message ID saved: \" + jsonData._id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"channel_id\": \"6981eb94cfd4e5ec660cb179\",\r\n    \"content\": \"Test Message to delete .\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/messages",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"content\": \"New edited Message\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/messages/6981ece2cfd4e5ec660cb17b",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "messages",
+                "6981ece2cfd4e5ec660cb17b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/messages/6981ecf5cfd4e5ec660cb17c",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "messages",
+                "6981ecf5cfd4e5ec660cb17c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "send file success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Check Status Code (201 Created)\r",
+                  "pm.test(\"Status code is 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Verify Message ID exists\r",
+                  "pm.test(\"Message ID is present\", function () {\r",
+                  "    pm.expect(jsonData.data).to.have.property(\"id\");\r",
+                  "    // Save for later tests (e.g., Delete Message)\r",
+                  "    pm.environment.set(\"last_message_id\", jsonData.data.id);\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Verify File URL is generated\r",
+                  "pm.test(\"Attachment URL exists\", function () {\r",
+                  "    // This checks if Laravel returned the path to the file\r",
+                  "    pm.expect(jsonData.data).to.have.property(\"attachment_url\");\r",
+                  "    pm.expect(jsonData.data.attachment_url).to.be.a(\"string\");\r",
+                  "    pm.expect(jsonData.data.attachment_url).to.include(\"http\"); // Ensures it's a valid link\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Verify Message Type (if your API distinguishes text vs files)\r",
+                  "pm.test(\"Message type is detected as file\", function () {\r",
+                  "    // Adjust 'has_attachment' or 'type' based on your specific API response\r",
+                  "    if (jsonData.data.type) {\r",
+                  "        pm.expect(jsonData.data.type).to.eql(\"file\"); \r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "channel_id",
+                  "value": "6981eb94cfd4e5ec660cb179",
+                  "type": "text",
+                  "uuid": "26c4b27e-e9d1-4c5d-944c-4bddff6ab17e"
+                },
+                {
+                  "key": "content",
+                  "value": "test file",
+                  "type": "text",
+                  "uuid": "fa082103-2b3e-4073-9cf0-e16123bc2227"
+                },
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "uuid": "46e262c9-8259-4a0a-a5c3-b0026ddac2c0",
+                  "src": "/C:/Users/M.A Computer/Desktop/Screenshot 2026-01-19 111009.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/messages",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "send file fail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Check Status Code (422 Unprocessable Content)\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Check for File Error\r",
+                  "pm.test(\"File type validation failed\", function () {\r",
+                  "    pm.expect(jsonData.errors).to.have.property('file');\r",
+                  "    \r",
+                  "    // Check message (Laravel default: \"The file must be a file of type: jpg, png, pdf.\")\r",
+                  "    pm.expect(jsonData.errors.file[0]).to.include(\"type\"); \r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"channel_id\": \"VALID_ID\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/messages",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "create team success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    pm.environment.set(\"team_id\", jsonData._id);\r",
+                  "    console.log(\"Team ID saved: \" + jsonData._id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Test team Developers\", \"workspace_id\": \"6981e594cfd4e5ec660cb175\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/teams",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List teams",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/teams?workspace_id=6981d8c2cfd4e5ec660cb173",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams"
+              ],
+              "query": [
+                {
+                  "key": "workspace_id",
+                  "value": "6981d8c2cfd4e5ec660cb173"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Dev test Squad\", \"description\": \"Updated description\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/teams/6981e798cfd4e5ec660cb178",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams",
+                "6981e798cfd4e5ec660cb178"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/teams/6981e798cfd4e5ec660cb178",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams",
+                "6981e798cfd4e5ec660cb178"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Check Status Code (422 Unprocessable Content)\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Check for File Error\r",
+                  "pm.test(\"File type validation failed\", function () {\r",
+                  "    pm.expect(jsonData.errors).to.have.property('file');\r",
+                  "    \r",
+                  "    // Check message (Laravel default: \"The file must be a file of type: jpg, png, pdf.\")\r",
+                  "    pm.expect(jsonData.errors.file[0]).to.include(\"type\"); \r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/teams",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Input Empty Field",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/teams",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "WorkSpace",
+      "item": [
+        {
+          "name": "create workspace-success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    // Save the Workspace ID\r",
+                  "    // Adjust path based on your response structure (e.g. jsonData.data._id)\r",
+                  "    pm.environment.set(\"workspace_id\", jsonData._id);\r",
+                  "    \r",
+                  "    console.log(\"Workspace ID saved: \" + jsonData._id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Test WorkSpace delete\",\r\n    \"description\": \"Main tech workspace\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/workspaces",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "workspace list",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}/workspaces",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Test Updated\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/workspaces/6981db77cfd4e5ec660cb174",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces",
+                "6981db77cfd4e5ec660cb174"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/workspaces/6981db77cfd4e5ec660cb174",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces",
+                "6981db77cfd4e5ec660cb174"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Check Status Code (422 Unprocessable Content)\r",
+                  "pm.test(\"Status code is 422\", function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Check for Name Error\r",
+                  "pm.test(\"Workspace name validation failed\", function () {\r",
+                  "    // Ensure the 'name' field is in the errors list\r",
+                  "    pm.expect(jsonData.errors).to.have.property('name');\r",
+                  "    \r",
+                  "    // Check the message (Laravel default: \"The name field is required.\")\r",
+                  "    pm.expect(jsonData.errors.name[0]).to.include(\"required\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/workspaces",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Input Empty Field",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"description\": \"No name provided\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/workspaces",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
