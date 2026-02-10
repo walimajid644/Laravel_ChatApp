@@ -11,6 +11,6 @@ class User extends Authenticatable
 
     protected $connection = 'mongodb';
     
-    protected $fillable = ['name', 'email', 'password', 'api_token'];
+    protected $fillable = ['name', 'email', 'password', 'otp','api_token'];
 
 }

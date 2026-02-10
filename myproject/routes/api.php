@@ -9,6 +9,9 @@ require __DIR__ . '/api/auth.php';
 
 Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])
 ->name('verification.verify');
+Route::post('/otp/send', [AuthController::class, 'sendOtp']);
+Route::post('/otp/verify', [AuthController::class, 'verifyOtp']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware(['custom_auth'])->group(function () {
     
